@@ -1,0 +1,8 @@
+curl -X GET http://localhost:8080/api/machines
+
+curl -X POST http://localhost:8080/api/user \
+-d "{\"User\":{\"First_name\": \"Diana\",\"Last_name\": \"Barreto\",\"Nick_name\": \"diabar\", \"Password\": \"test1234\"},\"Machines\":[\"1\",\"2\"]}"
+
+diabar:test1234
+ZGlhYmFyOnRlc3QxMjM0
+curl -X POST http://localhost:8080/api/user/validate -H 'Authorization:Basic ZGlhYmFyOnRlc3QxMjM0'

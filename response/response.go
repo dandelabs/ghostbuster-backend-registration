@@ -18,7 +18,7 @@ const (
 	CONST_TOKEN_EXP      = "token_expired"
 	CONST_PASSWORD_RESET = "password_reset"
 	CONST_UPDATE_DEVICE  = "device_token_updated"
-	CONST_RECORDINGS     = "recordings"
+	CONST_MACHINES       = "machines"
 	CONST_SESSIONS       = "sessions"
 	CONST_CONT_URL       = "recordings-url"
 	CONST_CAREGIVER_URL  = "caregiver-url"
@@ -28,7 +28,6 @@ const (
 	CONST_HELP_FILES     = "help_files"
 
 	CONST_SESSION_LIST = "session_list"
-	//SUCCESS_CODE = "200-0"
 )
 
 func BuildResponse(resType string, code int, reason string) (res *Response) {
