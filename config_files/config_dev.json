@@ -1,0 +1,13 @@
+{
+    "main": {
+    	"hostname":"http://127.0.0.1:8080",
+    },
+	"db": {
+		"url": "ccloud:Cl1n1cloud!@tcp(172.17.0.1:3306)/ccloud"
+	},
+	"crypto": {
+		"salt_size": 16,
+		"iterations": 4096,
+		"key_size": 32
+	},
+}

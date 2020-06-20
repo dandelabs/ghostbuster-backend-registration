@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/dandelabs/ghostbuster-backend-registration/cclog"
 	"github.com/dandelabs/ghostbuster-backend-registration/router"
+	"github.com/dandelabs/ghostbuster-backend-registration/config"
 	"net/http"
-	"os"
 )
 
 const (
@@ -29,9 +29,9 @@ func main() {
 	var mux = router.NewRouter(routes)
 	//fs := http.FileServer(http.Dir("./public/"))
 	//mux.PathPrefix("/api/web/public/").Handler(http.StripPrefix("/api/web/public/", fs))
-	cclog.InitLog(os.Stdout, os.Stdout, os.Stdout, os.Stderr)
-	cclog.Info.Printf("%s, Protocol 2: %s", method, "http")
-	err = http.ListenAndServe(":8080", Log(mux))
+
+	cclog.Info.Printf( method, config.Cfg.Main.Hostname)
+	err = http.ListenAndServe(config.Cfg.Main.Hostname, Log(mux))
 
 	if err != nil {
 		panic(err)

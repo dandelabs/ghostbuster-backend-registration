@@ -9,32 +9,12 @@ import (
 
 	"encoding/base64"
 	"errors"
-	"html/template"
-	"io"
-	"os"
-	"strings"
-
 	"github.com/dandelabs/ghostbuster-backend-registration/cclog"
 	"github.com/dandelabs/ghostbuster-backend-registration/db"
 	"github.com/dandelabs/ghostbuster-backend-registration/response"
+	"io"
+	"strings"
 )
-
-// ServiceName for config
-const ServiceName = "registration"
-
-var secretKey string
-var templates *template.Template
-var clientID string
-
-func init() {
-	method := "init:"
-	err := db.StartDBCon("app:C4r0l1na!@tcp(localhost:3306)/pfoptimization")
-	if err != nil {
-		cclog.Error.Println(method + " It could not database connection:" + err.Error())
-		os.Exit(3)
-	}
-
-}
 
 func GetMachines(params map[string]string) (res *response.Response) {
 	method := "GetMachines"
