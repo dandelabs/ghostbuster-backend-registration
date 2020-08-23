@@ -1,16 +1,14 @@
-from .singleton import Singleton
+class ResponseHttp():
 
-class ResponseHttp(metaclass=Singleton):
+    def __init__(self, data=None, error=None):
 
-    def __init__(self, _data, _errors):
+        if error is None:
+            error = ''
 
-        if _errors is None:
-            _errors = ''
+        if data is None:
+            data = ''
 
-        if _data is None:
-            _data = ''
-
-        self.data = {
-            'results': _data,
-            'errors': _errors
+        self.result = {
+            'result': data,
+            'error': error
         }
