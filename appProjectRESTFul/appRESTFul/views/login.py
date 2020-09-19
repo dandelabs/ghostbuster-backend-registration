@@ -1,5 +1,7 @@
 import jwt
 
+from datetime import timedelta
+
 from django.contrib.auth.signals import user_logged_in
 from django.http.response import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -27,14 +29,14 @@ def do_login(request):
     password = request.data.get("password")
 
     if username is None or password is None:
-        return JsonResponse({'error': 'Please provide both username and password'},
+        return JsonResponse('Please provide both username and password', safe=False,
                         status=HTTP_400_BAD_REQUEST)
 
     user = ModelAuthentication.authenticate(
         request, username=username, password=password)
 
     if not user:
-        return JsonResponse({'error': 'User not found'},
+        return JsonResponse('User or password wrong', safe=False,
                         status=HTTP_404_NOT_FOUND)
 
 
@@ -43,7 +45,19 @@ def do_login(request):
     user_logged_in.send(sender=user.__class__,
                         request=request, user=user)
     
-    response = ObjectResponse(token, None)
+    response = {
+        "id": user.id,
+        "username": user.nick_name,
+        "firstName": user.firstName,
+        "lastName": user.lastName,
+        "statusId": user.statusId,
+        "salt": user.salt,
+        "token": token,
+        "lastlogin": user.last_login,
+        "expiration": user.last_login + timedelta(minutes=30)
+    }
+    
+    response = ObjectResponse(response, None)
 
     return Response(response.result,
                     status=HTTP_200_OK)

@@ -1,16 +1,18 @@
 from rest_framework import serializers
 from django.contrib.auth.hashers import make_password
 from .models import *
- 
+
+
 class ProductionStatusSerializer(serializers.ModelSerializer):
- 
+
     class Meta:
         model = ProductionStatus
         fields = ('id',
                   'description',
                   'statusId')
-        
-class ItemsSerializer(serializers.ModelSerializer):        
+
+
+class ItemsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Item
         fields = ('id',
@@ -18,48 +20,83 @@ class ItemsSerializer(serializers.ModelSerializer):
                   'description',
                   'statusId')
 
-class MachinesSerializer(serializers.ModelSerializer):                
+
+class MachinesSerializer(serializers.ModelSerializer):
+
+    primaryStatusName = serializers.ReadOnlyField()
+    secondaryStatusName = serializers.ReadOnlyField()
+
     class Meta:
         model = Machine
         fields = ('id',
                   'name',
-                  'statusIdPrimary',
-                  'statusIdSecondary',
-                  'statusId')
-        
-class ProductsProcessesSerializer(serializers.ModelSerializer):                
+                  'statusId',
+                  'primaryStatusId',
+                  'secondaryStatusId',
+                  'primaryStatusName',
+                  'secondaryStatusName')
+
+
+class ProductsProcessesSerializer(serializers.ModelSerializer):
+
+    fromStatusName = serializers.ReadOnlyField()
+    toStatusName = serializers.ReadOnlyField()
+    itemName = serializers.ReadOnlyField()
+    machineName = serializers.ReadOnlyField()
+    
     class Meta:
         model = ProductsProcesses
         fields = ('id',
                   'itemId',
+                  'statusId',
                   'fromStatusId',
                   'toStatusId',
                   'machineId',
-                  'stdTime', 
-                  'machineId')
-        
-class UsersSerializer(serializers.ModelSerializer):                
+                  'stdTime',
+                  'machineId',
+                  'fromStatusName',
+                  'toStatusName',
+                  'itemName',
+                  'machineName')
+
+class UsersSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = User
         fields = ('id',
                   'firstName',
                   'lastName',
                   'nick_name',
-                  'password',
                   'salt',
                   'statusId',
                   'createdDate',
-                  'updatedDate')
-        write_only_fields = ('password',)
+                  'updatedDate',
+                  'password',
+                  'date_of_birth')
+
+        extra_kwargs = {'password': {'write_only': True}}
+        read_only_fields = ('auth_token',)
 
     def create(self, validated_data):
-        user = super(UsersSerializer, self).create(validated_data)
-        user.set_password(validated_data['password'])
-        user.save()
+        try:
+            user = super(UsersSerializer, self).create(validated_data)
+            user.set_password(validated_data['password'])
+            user.save()
+        except KeyError:
+            pass
         return user
 
-        
-class ChangeOverSerializer(serializers.ModelSerializer):                
+    def update(self, instance, validated_data):
+        user = super(UsersSerializer, self).update(instance, validated_data)
+        try:
+            user.set_password(validated_data['password'])
+            user.save()
+        except KeyError:
+            pass
+        return user
+
+
+class ChangeOverSerializer(serializers.ModelSerializer):
     class Meta:
         model = ChangeoverCost
         fields = ('id',
@@ -67,8 +104,9 @@ class ChangeOverSerializer(serializers.ModelSerializer):
                   'toStatusId',
                   'time',
                   'statusId')
-        
-class DowntimeTypeSerializer(serializers.ModelSerializer):                
+
+
+class DowntimeTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = DowntimeType
         fields = ('id',
@@ -76,8 +114,9 @@ class DowntimeTypeSerializer(serializers.ModelSerializer):
                   'description',
                   'subject',
                   'statusId')
-        
-class OrderDetailsSerializer(serializers.ModelSerializer):                
+
+
+class OrderDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderDetails
         fields = ('id',
@@ -87,8 +126,9 @@ class OrderDetailsSerializer(serializers.ModelSerializer):
                   'quantityReceived',
                   'receivedDate',
                   'insertedDate',)
-        
-class DowntimesSerializer(serializers.ModelSerializer):                
+
+
+class DowntimesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Downtime
         fields = ('id',
@@ -99,8 +139,9 @@ class DowntimesSerializer(serializers.ModelSerializer):
                   'statusId',
                   'startTime',
                   'finishTime',)
-        
-class DowntimesHistorySerializer(serializers.ModelSerializer):                
+
+
+class DowntimesHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = DowntimesHistory
         fields = ('id',
@@ -111,23 +152,26 @@ class DowntimesHistorySerializer(serializers.ModelSerializer):
                   'statusId',
                   'startTime',
                   'finishTime',)
-        
-class MachineUserSerializer(serializers.ModelSerializer):                
+
+
+class MachineUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = MachineUser
         fields = ('id',
                   'userId',
                   'machineId',
                   'statusId')
-        
-class OrderStatusSerializer(serializers.ModelSerializer):                
+
+
+class OrderStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderStatus
         fields = ('id',
                   'description',
-                  'statusId')        
-        
-class OrdersSerializer(serializers.ModelSerializer):                
+                  'statusId')
+
+
+class OrdersSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ('id',
@@ -140,8 +184,9 @@ class OrdersSerializer(serializers.ModelSerializer):
                   'modifiedDate',
                   'insertedDate',
                   'priorityStatusId',)
-        
-class OrdersHistorySerializer(serializers.ModelSerializer):                
+
+
+class OrdersHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = OrdersHistory
         fields = ('id',
@@ -155,8 +200,9 @@ class OrdersHistorySerializer(serializers.ModelSerializer):
                   'receivedDate',
                   'statusId',
                   'scheduleTime',)
-        
-class ProductionSerializer(serializers.ModelSerializer):                
+
+
+class ProductionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Production
         fields = ('id',
@@ -167,8 +213,9 @@ class ProductionSerializer(serializers.ModelSerializer):
                   'startTime',
                   'finishTime',
                   'unitsManufactured',)
-        
-class ProductionHistorySerializer(serializers.ModelSerializer):                
+
+
+class ProductionHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductionHistory
         fields = ('id',
@@ -179,8 +226,9 @@ class ProductionHistorySerializer(serializers.ModelSerializer):
                   'startTime',
                   'finishTime',
                   'unitsManufactured',)
-        
-class ScheduleSerializer(serializers.ModelSerializer):                
+
+
+class ScheduleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Schedule
         fields = ('id',

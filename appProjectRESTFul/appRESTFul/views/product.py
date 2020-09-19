@@ -4,8 +4,8 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from django.db.models import Q
 
-from ..models import DowntimeType
-from ..serializers import DowntimeTypeSerializer
+from ..models import ProductsProcesses
+from ..serializers import ProductsProcessesSerializer
 from ..utils.response import ResponseHttp
 
 from rest_framework.status import (
@@ -21,25 +21,30 @@ from rest_framework.status import (
 # GET, POST AND DELETE many items
 
 
-@api_view(['GET', 'POST'])
-def downtimeType_list(request):
+@api_view(['GET', 'POST', 'DELETE'])
+def product_list(request):
 
     try:
 
         if request.method == 'GET':
-            items = list(DowntimeType.objects.all())
-            items_serializer = DowntimeTypeSerializer(items, many=True)
+            items = list(ProductsProcesses.objects.all())
+
+            items_serializer = ProductsProcessesSerializer(items, many=True)
 
             return JsonResponse(items_serializer.data, safe=False, status=HTTP_200_OK)
 
         elif request.method == 'POST':
             item_data = JSONParser().parse(request)
-            item_serializer = DowntimeTypeSerializer(data=item_data)
+            item_serializer = ProductsProcessesSerializer(data=item_data)
 
             if item_serializer.is_valid():
                 item_serializer.save()
                 return JsonResponse({'result': item_serializer.data, 'error': ''}, status=HTTP_201_CREATED)
             return JsonResponse({'result': '', 'error': item_serializer.errors}, status=HTTP_400_BAD_REQUEST)
+
+        elif request.method == 'DELETE':
+            count = ProductsProcesses.objects.all().delete()
+            return JsonResponse(ResponseHttp(data='{0} products were deleted successfully!'.format(count[0])).result, status=HTTP_204_NO_CONTENT)
 
     except Exception as error:
         return JsonResponse(ResponseHttp(error=str(error)).result, status=HTTP_500_INTERNAL_SERVER_ERROR)
@@ -47,18 +52,18 @@ def downtimeType_list(request):
 
 # GET, PUT AND DELETE one item
 @api_view(['GET', 'PUT', 'DELETE'])
-def downtimeType_detail(request, pk):
+def product_detail(request, pk):
 
     try:
-        item = DowntimeType.objects.get(pk=pk)
+        item = ProductsProcesses.objects.get(pk=pk)
 
         if request.method == 'GET':
-            item_serializer = DowntimeTypeSerializer(item)
-            return JsonResponse(item_serializer.data, status=HTTP_200_OK)
+            item_serializer = ProductsProcessesSerializer(item)
+            return JsonResponse({'result': item_serializer.data, 'error': ''}, status=HTTP_200_OK)
 
         elif request.method == 'PUT':
             item_data = JSONParser().parse(request)
-            item_serializer = DowntimeTypeSerializer(
+            item_serializer = ProductsProcessesSerializer(
                 item, data=item_data, partial=True)
 
             if item_serializer.is_valid():
@@ -69,10 +74,27 @@ def downtimeType_detail(request, pk):
 
         elif request.method == 'DELETE':
             item.delete()
-            return JsonResponse(ResponseHttp(data='DowntimeType was deleted successfully').result, status=HTTP_204_NO_CONTENT)
+            return JsonResponse(ResponseHttp(data='Product was deleted successfully').result, status=HTTP_204_NO_CONTENT)
 
-    except DowntimeType.DoesNotExist:
-        result = ResponseHttp(error='The downtimeType does not exist').result
+    except ProductsProcesses.DoesNotExist:
+        result = ResponseHttp(error='The machine does not exist').result
         return JsonResponse(result, status=HTTP_404_NOT_FOUND)
     except Exception as error:
         return JsonResponse(ResponseHttp(error=str(error)).result, status=HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# GET an item by condition
+@ api_view(['POST'])
+def product_filter(request):
+
+    items = list(ProductsProcesses.objects.select_related('machines').filter(Q(machines__name__icontains=request.data.get('name') or '')).select_related('items').filter(Q(items__item_description__icontains=request.data.get('description') or '')))
+
+    try:
+        if request.method == 'POST':
+            item_serializer=ProductsProcessesSerializer(items, many = True)
+            return JsonResponse(item_serializer.data, safe = False)
+
+    except ProductsProcesses.DoesNotExist:
+        return JsonResponse(ResponseHttp(error='Product does not exist').result, status = HTTP_404_NOT_FOUND)
+    except Exception as error:
+        return JsonResponse(ResponseHttp(error=str(error)).result, status = HTTP_500_INTERNAL_SERVER_ERROR)

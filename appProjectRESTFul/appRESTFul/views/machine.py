@@ -26,9 +26,10 @@ def machine_list(request):
 
         if request.method == 'GET':
             items = list(Machine.objects.all())
+            
             items_serializer = MachinesSerializer(items, many=True)
             
-            return JsonResponse({'result': items_serializer.data, 'error' : ''}, safe=False, status=HTTP_200_OK)
+            return JsonResponse(items_serializer.data, safe=False, status=HTTP_200_OK)
         
         elif request.method == 'POST':
             item_data = JSONParser().parse(request)
@@ -41,7 +42,7 @@ def machine_list(request):
 
         elif request.method == 'DELETE':
             count = Machine.objects.all().delete()
-            return JsonResponse(ResponseHttp(data='{0} items were deleted successfully!'.format(count[0])).result, status=HTTP_204_NO_CONTENT)
+            return JsonResponse(ResponseHttp(data='{0} machines were deleted successfully!'.format(count[0])).result, status=HTTP_204_NO_CONTENT)
 
     except Exception as error:
         return JsonResponse(ResponseHttp(error=str(error)).result, status=HTTP_500_INTERNAL_SERVER_ERROR)
@@ -83,14 +84,19 @@ def machine_detail(request, pk):
 @ api_view(['POST'])
 def machine_filter(request):
     
-    items = list(Machine.objects.filter(Q(name__icontains=request.data.get('name'))))
+    kwargs = {
+        '{0}__{1}'.format('statusId', 'exact'): request.data.get('statusId') or 1,
+        '{0}__{1}'.format('name', 'icontains'): request.data.get('name') or ''
+    }
+    
+    items = list(Machine.objects.filter(**kwargs))
     
     try:
         if request.method == 'POST':
             item_serializer = MachinesSerializer(items, many=True)
-            return JsonResponse({'result': item_serializer.data, 'error' : ''}, safe=False)
+            return JsonResponse(item_serializer.data, safe=False)
 
     except Machine.DoesNotExist:
-        return JsonResponse(ResponseHttp(error='The item does not exist').result, status=HTTP_404_NOT_FOUND)
+        return JsonResponse(ResponseHttp(error='Machine does not exist').result, status=HTTP_404_NOT_FOUND)
     except Exception as error:
         return JsonResponse(ResponseHttp(error=str(error)).result, status=HTTP_500_INTERNAL_SERVER_ERROR)

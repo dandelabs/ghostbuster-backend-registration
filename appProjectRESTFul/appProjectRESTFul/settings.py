@@ -58,6 +58,9 @@ MIDDLEWARE = [
 ]
 
 REST_FRAMEWORK = {
+    'DATE_INPUT_FORMATS': ["%d-%m-%Y"],
+    'DATE_FORMAT': "%d-%m-%Y",
+    'DATETIME_FORMAT': "%d-%m-%Y %H:%M:%S",
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
     ),
@@ -67,7 +70,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PARSER_CLASSES': (
         'rest_framework.parsers.JSONParser',
         'rest_framework.parsers.FormParser',
-    )
+    ),
 }
 
 JWT_AUTH = {
@@ -80,9 +83,11 @@ JWT_AUTH = {
 }
 
 
-CORS_ORIGIN_ALLOW_ALL = False
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_WHITELIST = (
     'http://localhost:8081',
+    'http://localhost:4200',
     'http://localhost'
 )
 

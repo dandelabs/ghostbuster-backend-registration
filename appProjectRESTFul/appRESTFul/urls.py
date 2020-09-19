@@ -1,5 +1,5 @@
 from django.conf.urls import url 
-from appRESTFul.views import item as itemView, login as loginView, machine as machineView, user as userView, downtime as downtimeView, downtimeTypes as downtimeTypeView, orderStatus as orderStatusView
+from appRESTFul.views import item as itemView, login as loginView, machine as machineView, user as userView, downtime as downtimeView, downtimeTypes as downtimeTypeView, orderStatus as orderStatusView, productionStatus as productionStatusView, product as productView
 
 urlpatterns = [
     #Item urls
@@ -35,4 +35,14 @@ urlpatterns = [
     #Orderstatus urls
     url(r'^api/v1/orderstatus$', orderStatusView.orderStatus_list),
     url(r'^api/v1/orderstatus/(?P<pk>[0-9]+)$', orderStatusView.orderStatus_detail),
+    
+    #Productionstatus urls
+    url(r'^api/v1/productionstatus$', productionStatusView.productionStatus_list),
+    url(r'^api/v1/productionstatus/(?P<pk>[0-9]+)$', productionStatusView.productionStatus_detail),
+    url(r'^api/v1/productionstatus/filter$', productionStatusView.productionStatus_filter),
+    
+    #Products
+    url(r'^api/v1/product$', productView.product_list),
+    url(r'^api/v1/product/(?P<pk>[0-9]+)$', productView.product_detail),
+    url(r'^api/v1/product/filter$', productView.product_filter),
 ]

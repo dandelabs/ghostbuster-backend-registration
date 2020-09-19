@@ -24,9 +24,17 @@ class Item(models.Model):
 class Machine(models.Model):
     id = models.AutoField(primary_key=True, db_column='machine_id')
     name = models.CharField(max_length=9, db_column='machine_name')
-    statusIdPrimary = models.ForeignKey(ProductionStatus, models.DO_NOTHING, db_column='status_id_primary_rm', related_name='machines_primary_status_id')
-    statusIdSecondary = models.ForeignKey(ProductionStatus, models.DO_NOTHING, db_column='status_id_secondary_rm', related_name='machines_secondary_status_id')
+    primaryStatusId = models.ForeignKey(ProductionStatus, models.DO_NOTHING, db_column='status_id_primary_rm', related_name='primaryStatus')
+    secondaryStatusId = models.ForeignKey(ProductionStatus, models.DO_NOTHING, db_column='status_id_secondary_rm', related_name='secondaryStatus')
     statusId = models.IntegerField(db_column='machine_active')
+    
+    @property
+    def primaryStatusName(self):
+        return self.primaryStatusId.description
+    
+    @property
+    def secondaryStatusName(self):
+        return self.secondaryStatusId.description
 
     class Meta:
         managed = True
@@ -34,12 +42,28 @@ class Machine(models.Model):
         
 class ProductsProcesses(models.Model):
     id = models.AutoField(primary_key=True, db_column='product_processes_id')
-    itemId = models.ForeignKey(Item, models.DO_NOTHING, db_column='item_id')
-    fromStatusId = models.ForeignKey(ProductionStatus, models.DO_NOTHING, db_column='from_status_id', related_name='product_from_status')
-    toStatusId = models.ForeignKey(ProductionStatus, models.DO_NOTHING, db_column='to_status_id', related_name='product_to_status')
-    machineId = models.ForeignKey(Machine, models.DO_NOTHING, db_column='machine_id')
-    stdTime = models.IntegerField(db_column="product_processes_std_time")
     statusId = models.IntegerField(db_column="product_processes_active")
+    stdTime = models.IntegerField(db_column="product_processes_std_time")
+    itemId = models.ForeignKey(Item, models.DO_NOTHING, db_column='item_id', related_name='itemName')
+    fromStatusId = models.ForeignKey(ProductionStatus, models.DO_NOTHING, db_column='from_status_id', related_name='fromStatusName')
+    toStatusId = models.ForeignKey(ProductionStatus, models.DO_NOTHING, db_column='to_status_id', related_name='toStatusName')
+    machineId = models.ForeignKey(Machine, models.DO_NOTHING, db_column='machine_id', related_name='machineName')
+
+    @property
+    def fromStatusName(self):
+        return self.fromStatusId.description
+    
+    @property
+    def toStatusName(self):
+        return self.toStatusId.description
+    
+    @property
+    def itemName(self):
+        return self.itemId.description
+    
+    @property
+    def machineName(self):
+        return self.machineId.name
 
     class Meta:
         managed = True
@@ -78,7 +102,7 @@ class User(AbstractBaseUser):
     updatedDate = models.FloatField(blank=True, null=True, db_column="updated")
     
     #Fields inherited from AbstractBaseUser model
-    date_of_birth = models.DateField(blank=True, null=True)
+    date_of_birth = models.DateField(blank=True, null=True, db_column="date_of_birth")
     picture = models.ImageField(blank=True, null=True)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
